@@ -1,57 +1,53 @@
 package su.rusfearuth.reactnative.native9patch;
 
 import android.content.Context;
-import android.support.annotation.NonNull;
 import android.widget.ImageView;
-
-import su.rusfearuth.reactnative.native9patch.RCTImageCache;
 
 
 public class RCTImageCapInsetView extends ImageView {
-    private String mUri;
+  private String mUri;
 
-    public RCTImageCapInsetView(Context context) {
-        super(context);
+  public RCTImageCapInsetView(Context context) {
+    super(context);
+  }
+
+  public void setSource(String uri) {
+    mUri = uri;
+    reload();
+  }
+
+  public void reload() {
+    Integer resId = null;
+    if (getImageCache().has(mUri)) {
+      resId = getImageCache().get(mUri);
+      if (resId == null) {
+        getImageCache().remove(mUri);
+      }
     }
 
-    public void setSource(String uri) {
-        mUri = uri;
-        reload();
+    if (resId == null) {
+      resId = getResourceDrawableId(mUri);
+      getImageCache().put(mUri, resId);
     }
 
-    public void reload() {
-        Integer resId = null;
-        if (getImageCache().has(mUri)) {
-            resId = getImageCache().get(mUri);
-            if (resId == null) {
-                getImageCache().remove(mUri);
-            }
-        }
+    setBackgroundResource(resId);
+  }
 
-        if (resId == null) {
-            resId = getResourceDrawableId(mUri);
-            getImageCache().put(mUri, resId);
-        }
-
-        setBackgroundResource(resId);
+  private Integer getResourceDrawableId(final String aName) {
+    if (aName == null || aName.isEmpty()) {
+      return 0;
     }
 
-    private @NonNull Integer getResourceDrawableId(@NonNull final String aName) {
-        if (aName == null || aName.isEmpty()) {
-                return 0;
-        }
+    final String name = aName.toLowerCase().replace("-", "_");
 
-        final String name = aName.toLowerCase().replace("-", "_");
+    return getResources().getIdentifier(
+      name,
+      "drawable",
+      getContext().getPackageName()
+    );
+  }
 
-        return getResources().getIdentifier(
-                name,
-                "drawable",
-                getContext().getPackageName()
-        );
-    }
-
-    private RCTImageCache getImageCache()
-    {
-        return RCTImageCache.getInstance();
-    }
+  private RCTImageCache getImageCache() {
+    return RCTImageCache.getInstance();
+  }
 }
